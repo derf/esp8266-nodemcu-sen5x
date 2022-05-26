@@ -10,6 +10,7 @@ sen5x.lua has been tested with Lua 5.1 on NodeMCU firmware 3.0.1 (Release
 202112300746, integer build). It requires the following modules.
 
 * i2c
+* bit
 
 The MQTT HomeAssistant integration in init.lua additionally needs the following
 modules.

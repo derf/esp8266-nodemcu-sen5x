@@ -48,6 +48,9 @@ function sen5x.read()
 	end
 	local data = i2c.read(sen5x.bus_id, 24)
 	i2c.stop(sen5x.bus_id)
+	if not sen5x.crc_valid(data, 24) then
+		return false
+	end
 	sen5x.pm1 = sen5x.read_value(data, 1)
 	sen5x.pm2_5 = sen5x.read_value(data, 4)
 	sen5x.pm4 = sen5x.read_value(data, 7)
@@ -76,11 +79,39 @@ function sen5x.get_product()
 	end
 	local data = i2c.read(sen5x.bus_id, 48)
 	i2c.stop(sen5x.bus_id)
+	if not sen5x.crc_valid(data, 48) then
+		return false
+	end
 	local ret = ""
 	ret = ret .. string.sub(data, 1, 2)
 	ret = ret .. string.sub(data, 4, 5)
 	ret = ret .. string.sub(data, 7, 7)
 	return ret
+end
+
+function sen5x.crc_word(data, index)
+	local crc = 0xff
+	for i = index, index+1 do
+		crc = bit.bxor(crc, string.byte(data, i))
+		for j = 8, 1, -1 do
+			if bit.isset(crc, 7) then
+				crc = bit.bxor(bit.lshift(crc, 1), 0x31)
+			else
+				crc = bit.lshift(crc, 1)
+			end
+			crc = bit.band(crc, 0xff)
+		end
+	end
+	return bit.band(crc, 0xff)
+end
+
+function sen5x.crc_valid(data, length)
+	for i = 1, length, 3 do
+		if sen5x.crc_word(data, i) ~= string.byte(data, i+2) then
+			return false
+		end
+	end
+	return true
 end
 
 return sen5x
