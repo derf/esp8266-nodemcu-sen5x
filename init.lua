@@ -175,12 +175,12 @@ function hass_register()
 		local hass_humi = string.format('{%s,"name":"Humidity","object_id":"%s_humidity","unique_id":"%s_humidity","device_class":"humidity","unit_of_measurement":"%%","value_template":"{{value_json.humidity_relpercent}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/humidity/config", hass_humi})
 
-		local hass_voc = string.format('{%s,"name":"VOC","object_id":"%s_voc","unique_id":"%s_voc","device_class":"aqi","value_template":"{{value_json.voc}}"}', hass_entity_base, device_id, device_id)
+		local hass_voc = string.format('{%s,"name":"VOC","object_id":"%s_voc","unique_id":"%s_voc","unit_of_measurement":"VOC","icon":"mdi:air-filter","value_template":"{{value_json.voc}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/voc/config", hass_voc})
 	end
 
 	if product_name == "SEN55" then
-		local hass_nox = string.format('{%s,"name":"NOx","object_id":"%s_nox","unique_id":"%s_nox","device_class":"nitrous_oxide","value_template":"{{value_json.nox}}"}', hass_entity_base, device_id, device_id)
+		local hass_nox = string.format('{%s,"name":"NOx","object_id":"%s_nox","unique_id":"%s_nox","unit_of_measurement":"NOx","icon":"mdi:molecule","value_template":"{{value_json.nox}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/nox/config", hass_nox})
 	end
 
