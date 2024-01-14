@@ -2,17 +2,16 @@
 
 This repository contains an ESP8266 NodeMCU Lua module (`sen5x.lua`) as well as
 MQTT / HomeAssistant / InfluxDB integration example (`init.lua`) for
-**Sensirion SEN5x** particulate matter, VOC, and NOx sensors.
-
-![](https://finalrewind.org/projects/esp8266-nodemcu-sen5x/media/preview.jpg)
+**Sensirion SEN5x** I²C particulate matter, VOC, and NOx sensors connected via
+I²C.
 
 ## Dependencies
 
 sen5x.lua has been tested with Lua 5.1 on NodeMCU firmware 3.0.1 (Release
 202112300746, integer build). It requires the following modules.
 
-* i2c
 * bit
+* i2c
 
 The MQTT HomeAssistant integration in init.lua additionally needs the following
 modules.
@@ -21,7 +20,6 @@ modules.
 * mqtt
 * node
 * tmr
-* uart
 * wifi
 
 ## Setup
@@ -36,7 +34,7 @@ Connect the SEN5x board to your ESP8266/NodeMCU board as follows.
 SDA and SCL must have external pull-up resistors to 3V3.
 
 If you use different pins for SDA and SCL, you need to adjust the
-softuart.setup call in the examples provided in this repository to reflect
+i2c.setup call in the examples provided in this repository to reflect
 those changes. Keep in mind that some ESP8266 pins must have well-defined logic
 levels at boot time and may therefore be unsuitable for SEN5x connection.
 
@@ -60,7 +58,16 @@ end
 
 function read_data()
 	if sen5x.read() then
-		print(string.format("PM1: %d.%01d µg/m³", sen5x.pm1/10, sen5x.pm1%10))
+		-- Available values depend on sensor type (SEN50/SEN54/SEN55)
+		-- Unsupported readings are nil
+		-- sen5x.pm1         : pm1/10   == PM1.0 concentration [µg/m³]
+		-- sen5x.pm2_5       : pm2_5/10 == PM2.5 concentration [µg/m³]
+		-- sen5x.pm4         : pm4/10   == PM4.0 concentration [µg/m³]
+		-- sen5x.pm10        : pm10/10  == PM10  concentration [µg/m³]
+		-- sen5x.humidity    : humidity/100 == Humidity [%]
+		-- sen5x.temperature : temperature/200 == Temperature [°c]
+		-- sen5x.voc         : voc/10 == VOC [?]
+		-- sen5x.nox         : nox/10 == NOx [?]
 	end
 end
 ```
@@ -71,8 +78,7 @@ end
 To use it, you need to create a **config.lua** file with WiFi and MQTT settings:
 
 ```lua
-station_cfg.ssid = "..."
-station_cfg.pwd = "..."
+station_cfg = {ssid = "...", pwd = "..."}
 mqtt_host = "..."
 ```
 
@@ -84,4 +90,10 @@ influx_url = "..."
 influx_attr = "..."
 ```
 
-Readings will be stored as `sen5x,[influx_attr] pm1_ugm3=...,pm2_5_ugm3=...,...`
+Readings will be published as `sen5x[influx_attr] pm1_ugm3=%d.%01d,pm2_5_ugm3=%d.%01d,pm4_ugm3=%d.%01d,pm10_ugm3=%d.%01d,humidity_relpercent=%d.%01d,temperature_celsius=%d.%01d,voc=%d.%01d,nox=%d.%01d,`
+(or a subset thereof, depending on whether a SEN50/SEN54/SEN55 is connected).
+So, unless `influx_attr = ''`, it must start with a comma, e.g. `influx_attr = ',device=' .. device_id`.
+
+## Images
+
+![](https://finalrewind.org/projects/esp8266-nodemcu-sen5x/media/preview.jpg)
