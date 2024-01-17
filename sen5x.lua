@@ -2,6 +2,7 @@ local sen5x = {}
 local device_address = 0x69
 
 sen5x.bus_id = 0
+sen5x.status = "Initializing"
 
 function sen5x.start()
 	i2c.start(sen5x.bus_id)
@@ -59,6 +60,47 @@ function sen5x.read()
 	sen5x.temperature = sen5x.read_value(data, 16)
 	sen5x.voc = sen5x.read_value(data, 19)
 	sen5x.nox = sen5x.read_value(data, 22)
+	return true
+end
+
+function sen5x.prepare_read_status()
+	i2c.start(sen5x.bus_id)
+	if not i2c.address(sen5x.bus_id, device_address, i2c.TRANSMITTER) then
+		return false
+	end
+	i2c.write(sen5x.bus_id, {0xd2, 0x06})
+	i2c.stop(sen5x.bus_id)
+	return true
+end
+
+function sen5x.read_status()
+	i2c.start(sen5x.bus_id)
+	if not i2c.address(sen5x.bus_id, device_address, i2c.RECEIVER) then
+		return false
+	end
+	local data = i2c.read(sen5x.bus_id, 6)
+	i2c.stop(sen5x.bus_id)
+	if not sen5x.crc_valid(data, 6) then
+		return false
+	end
+	local status1 = string.byte(data, 1)
+	local status2 = string.byte(data, 5)
+
+	if bit.isset(status1, 5) then
+		sen5x.status = "Fan speed out of range"
+	elseif bit.isset(status1, 3) then
+		sen5x.status = "Fan cleaning active"
+	elseif bit.isset(status2, 7) then
+		sen5x.status = "Gas sensor error"
+	elseif bit.isset(status2, 6) then
+		sen5x.status = "RHT sensor error"
+	elseif bit.isset(status2, 5) then
+		sen5x.status = "Laser failure"
+	elseif bit.isset(status2, 4) then
+		sen5x.status = "Fan failure"
+	else
+		sen5x.status = "OK"
+	end
 	return true
 end
 

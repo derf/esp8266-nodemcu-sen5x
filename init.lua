@@ -26,14 +26,17 @@ end
 function setup_client()
 	print("Connected")
 	gpio.write(ledpin, 1)
+	local json_str = '{"status":"Initializing"}'
 	if not sen5x.start() then
-		print("SEN5x initialization error")
+		json_str = '{"status":"Initialization failed"}'
 	end
 	publishing_mqtt = true
 	mqttclient:publish(mqtt_prefix .. "/state", "online", 0, 1, function(client)
-		publishing_mqtt = false
-		push_timer:start()
-		prepare_push_data()
+		mqttclient:publish(mqtt_prefix .. "/data", json_str, 0, 0, function(client)
+			publishing_mqtt = false
+			push_timer:start()
+			prepare_push_data()
+		end)
 	end)
 end
 
@@ -55,6 +58,22 @@ function connect_wifi()
 	wifi.setmode(wifi.STATION)
 	wifi.sta.config(station_cfg)
 	wifi.sta.connect()
+end
+
+function prepare_get_status()
+	if sen5x.prepare_read_status() == false then
+		print("SEN5x error")
+	else
+		local delayed_read_status = tmr.create()
+		delayed_read_status:register(20, tmr.ALARM_SINGLE, get_status)
+		delayed_read_status:start()
+	end
+end
+
+function get_status()
+	if sen5x.read_status() == false then
+		print("SEN5x error")
+	end
 end
 
 function prepare_push_data()
@@ -105,7 +124,7 @@ function push_data()
 			json_str = string.format('%s"nox":%d.%01d,', json_str, sen5x.nox/10, sen5x.nox%10)
 			influx_str = string.format("%snox=%d.%01d,", influx_str, sen5x.nox/10, sen5x.nox%10)
 		end
-		json_str = string.format('%s"rssi_dbm":%d}', json_str, wifi.sta.getrssi())
+		json_str = string.format('%s"status":"%s","rssi_dbm":%d}', json_str, sen5x.status, wifi.sta.getrssi())
 		influx_str = string.format("%srssi_dbm=%d", influx_str, wifi.sta.getrssi())
 
 		if not publishing_mqtt then
@@ -118,6 +137,7 @@ function push_data()
 					publish_influx(influx_str)
 				else
 					gpio.write(ledpin, 1)
+					prepare_get_status()
 					collectgarbage()
 				end
 			end)
@@ -131,6 +151,7 @@ function publish_influx(payload)
 		http.post(influx_url, influx_header, "sen5x" .. influx_attr .. " " .. payload, function(code, data)
 			publishing_http = false
 			gpio.write(ledpin, 1)
+			prepare_get_status()
 			collectgarbage()
 		end)
 	end
@@ -174,14 +195,17 @@ function hass_register()
 		local hass_humi = string.format('{%s,"name":"Humidity","object_id":"%s_humidity","unique_id":"%s_humidity","device_class":"humidity","unit_of_measurement":"%%","value_template":"{{value_json.humidity_relpercent}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/humidity/config", hass_humi})
 
-		local hass_voc = string.format('{%s,"name":"VOC","object_id":"%s_voc","unique_id":"%s_voc","unit_of_measurement":"VOC","icon":"mdi:air-filter","value_template":"{{value_json.voc}}"}', hass_entity_base, device_id, device_id)
+		local hass_voc = string.format('{%s,"name":"VOC","object_id":"%s_voc","unique_id":"%s_voc","unit_of_measurement":"counts","icon":"mdi:air-filter","value_template":"{{value_json.voc}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/voc/config", hass_voc})
 	end
 
 	if product_name == "SEN55" then
-		local hass_nox = string.format('{%s,"name":"NOx","object_id":"%s_nox","unique_id":"%s_nox","unit_of_measurement":"NOx","icon":"mdi:molecule","value_template":"{{value_json.nox}}"}', hass_entity_base, device_id, device_id)
+		local hass_nox = string.format('{%s,"name":"NOx","object_id":"%s_nox","unique_id":"%s_nox","unit_of_measurement":"counts","icon":"mdi:molecule","value_template":"{{value_json.nox}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/nox/config", hass_nox})
 	end
+	
+	local hass_status = string.format('{%s,"name":"Status","object_id":"%s_status","unique_id":"%s_status","icon":"mdi:information","value_template":"{{value_json.status}}","entity_category":"diagnostic"}', hass_entity_base, device_id, device_id)
+	table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/status/config", hass_status})
 
 	local hass_rssi = string.format('{%s,"name":"RSSI","object_id":"%s_rssi","unique_id":"%s_rssi","device_class":"signal_strength","unit_of_measurement":"dBm","value_template":"{{value_json.rssi_dbm}}","entity_category":"diagnostic"}', hass_entity_base, device_id, device_id)
 	table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/rssi/config", hass_rssi})
