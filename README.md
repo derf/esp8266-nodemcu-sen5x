@@ -97,3 +97,4 @@ So, unless `influx_attr = ''`, it must start with a comma, e.g. `influx_attr = '
 ## Images
 
 ![](https://finalrewind.org/projects/esp8266-nodemcu-sen5x/media/preview.jpg)
+![](https://finalrewind.org/projects/esp8266-nodemcu-sen5x/media/hass.png)
