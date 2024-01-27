@@ -1,9 +1,9 @@
 # ESP8266 Lua/NodeMCU module for Sensirion SEN5x PM sensors
 
-This repository contains an ESP8266 NodeMCU Lua module (`sen5x.lua`) as well as
-MQTT / HomeAssistant / InfluxDB integration example (`init.lua`) for
-**Sensirion SEN5x** I²C particulate matter, VOC, and NOx sensors connected via
-I²C.
+[esp8266-nodemcu-sen5x](https://finalrewind.org/projects/esp8266-nodemcu-sen5x/)
+provides an ESP8266 NodeMCU Lua module (`sen5x.lua`) as well as MQTT /
+HomeAssistant / InfluxDB integration example (`init.lua`) for **Sensirion
+SEN5x** I²C particulate matter, VOC, and NOx sensors connected via I²C.
 
 ## Dependencies
 
