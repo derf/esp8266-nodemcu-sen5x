@@ -1,26 +1,25 @@
 local sen5x = {}
 local device_address = 0x69
 
-sen5x.bus_id = 0
 sen5x.status = "Initializing"
 
 function sen5x.start()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.TRANSMITTER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.TRANSMITTER) then
 		return false
 	end
-	i2c.write(sen5x.bus_id, {0x00, 0x21})
-	i2c.stop(sen5x.bus_id)
+	i2c.write(0, {0x00, 0x21})
+	i2c.stop(0)
 	return true
 end
 
 function sen5x.stop()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.TRANSMITTER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.TRANSMITTER) then
 		return false
 	end
-	i2c.write(sen5x.bus_id, {0x01, 0x04})
-	i2c.stop(sen5x.bus_id)
+	i2c.write(0, {0x01, 0x04})
+	i2c.stop(0)
 	return true
 end
 
@@ -33,22 +32,22 @@ function sen5x.read_value(data, index)
 end
 
 function sen5x.prepare_read()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.TRANSMITTER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.TRANSMITTER) then
 		return false
 	end
-	i2c.write(sen5x.bus_id, {0x03, 0xc4})
-	i2c.stop(sen5x.bus_id)
+	i2c.write(0, {0x03, 0xc4})
+	i2c.stop(0)
 	return true
 end
 
 function sen5x.read()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.RECEIVER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.RECEIVER) then
 		return false
 	end
-	local data = i2c.read(sen5x.bus_id, 24)
-	i2c.stop(sen5x.bus_id)
+	local data = i2c.read(0, 24)
+	i2c.stop(0)
 	if not sen5x.crc_valid(data, 24) then
 		return false
 	end
@@ -64,22 +63,22 @@ function sen5x.read()
 end
 
 function sen5x.prepare_read_status()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.TRANSMITTER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.TRANSMITTER) then
 		return false
 	end
-	i2c.write(sen5x.bus_id, {0xd2, 0x06})
-	i2c.stop(sen5x.bus_id)
+	i2c.write(0, {0xd2, 0x06})
+	i2c.stop(0)
 	return true
 end
 
 function sen5x.read_status()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.RECEIVER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.RECEIVER) then
 		return false
 	end
-	local data = i2c.read(sen5x.bus_id, 6)
-	i2c.stop(sen5x.bus_id)
+	local data = i2c.read(0, 6)
+	i2c.stop(0)
 	if not sen5x.crc_valid(data, 6) then
 		return false
 	end
@@ -105,22 +104,22 @@ function sen5x.read_status()
 end
 
 function sen5x.prepare_get_product()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.TRANSMITTER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.TRANSMITTER) then
 		return false
 	end
-	i2c.write(sen5x.bus_id, {0xd0, 0x14})
-	i2c.stop(sen5x.bus_id)
+	i2c.write(0, {0xd0, 0x14})
+	i2c.stop(0)
 	return true
 end
 
 function sen5x.get_product()
-	i2c.start(sen5x.bus_id)
-	if not i2c.address(sen5x.bus_id, device_address, i2c.RECEIVER) then
+	i2c.start(0)
+	if not i2c.address(0, device_address, i2c.RECEIVER) then
 		return nil
 	end
-	local data = i2c.read(sen5x.bus_id, 48)
-	i2c.stop(sen5x.bus_id)
+	local data = i2c.read(0, 48)
+	i2c.stop(0)
 	if not sen5x.crc_valid(data, 48) then
 		return false
 	end

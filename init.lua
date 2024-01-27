@@ -17,7 +17,7 @@ gpio.mode(ledpin, gpio.OUTPUT)
 gpio.write(ledpin, 0)
 
 sen5x = require("sen5x")
-i2c.setup(sen5x.bus_id, 2, 1, i2c.SLOW)
+i2c.setup(0, 2, 1, i2c.SLOW)
 
 function log_restart()
 	print("Network error " .. wifi.sta.status())
