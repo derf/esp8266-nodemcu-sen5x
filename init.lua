@@ -185,7 +185,7 @@ function hass_register()
 	local hass_pm4 = string.format('{%s,"name":"PM4.0","object_id":"%s_pm4","unique_id":"%s_pm4","device_class":"pm25","unit_of_measurement":"µg/m³","value_template":"{{value_json.pm4_ugm3}}"}', hass_entity_base, device_id, device_id)
 	table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/pm4/config", hass_pm4})
 
-	local hass_pm10 = string.format('{%s,"name":"PM10","object_id":"%s_pm1*","unique_id":"%s_pm10","device_class":"pm10","unit_of_measurement":"µg/m³","value_template":"{{value_json.pm10_ugm3}}"}', hass_entity_base, device_id, device_id)
+	local hass_pm10 = string.format('{%s,"name":"PM10","object_id":"%s_pm10","unique_id":"%s_pm10","device_class":"pm10","unit_of_measurement":"µg/m³","value_template":"{{value_json.pm10_ugm3}}"}', hass_entity_base, device_id, device_id)
 	table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/pm10/config", hass_pm10})
 
 	if product_name ~= "SEN50" then
