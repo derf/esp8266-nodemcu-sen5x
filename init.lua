@@ -189,7 +189,7 @@ function hass_register()
 	table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/pm10/config", hass_pm10})
 
 	if product_name ~= "SEN50" then
-		local hass_temp = string.format('{%s,"name":"Temperature","object_id":"%s_temperature","unique_id":"%s_temperature","device_class":"temperature","unit_of_measurement":"°c","value_template":"{{value_json.temperature_celsius}}"}', hass_entity_base, device_id, device_id)
+		local hass_temp = string.format('{%s,"name":"Temperature","object_id":"%s_temperature","unique_id":"%s_temperature","device_class":"temperature","unit_of_measurement":"°C","value_template":"{{value_json.temperature_celsius}}"}', hass_entity_base, device_id, device_id)
 		table.insert(publish_queue, {"homeassistant/sensor/" .. device_id .. "/temperature/config", hass_temp})
 
 		local hass_humi = string.format('{%s,"name":"Humidity","object_id":"%s_humidity","unique_id":"%s_humidity","device_class":"humidity","unit_of_measurement":"%%","value_template":"{{value_json.humidity_relpercent}}"}', hass_entity_base, device_id, device_id)

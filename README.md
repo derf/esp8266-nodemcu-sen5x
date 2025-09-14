@@ -65,7 +65,7 @@ function read_data()
 		-- sen5x.pm4         : pm4/10   == PM4.0 concentration [µg/m³]
 		-- sen5x.pm10        : pm10/10  == PM10  concentration [µg/m³]
 		-- sen5x.humidity    : humidity/100 == Humidity [%]
-		-- sen5x.temperature : temperature/200 == Temperature [°c]
+		-- sen5x.temperature : temperature/200 == Temperature [°C]
 		-- sen5x.voc         : voc/10 == VOC [?]
 		-- sen5x.nox         : nox/10 == NOx [?]
 	end
