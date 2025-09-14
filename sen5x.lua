@@ -27,6 +27,8 @@ function sen5x.read_value(data, index)
 	local val = string.byte(data, index) * 256 + string.byte(data, index+1)
 	if val == 0xffff or val == 0x7fff then
 		val = nil
+	elseif val > 0x7fff then
+		val = val - 0x10000
 	end
 	return val
 end
